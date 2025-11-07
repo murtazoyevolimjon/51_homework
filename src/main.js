@@ -5,7 +5,6 @@ import { connectDB } from "./src/config/db.js";
 
 const app = express();
 
-
 // set the view engine to ejs
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -54,9 +53,6 @@ app.post("/blog/:id", async function (req, res) {
   console.log(updatedPost);
   res.redirect("/blog");
 });
-
-
-
 
 const bootstrap = async () => {
   try {
