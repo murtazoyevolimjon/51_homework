@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests yet\"",
     "prepare": "husky",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+  "format:check": "prettier --check ."
   },
-
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix",
     "*.{js,jsx,ts,tsx,json,css,scss,md}": "prettier --write"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/murtazoyevolimjon/51_homework.git"
@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/murtazoyevolimjon/51_homework#readme",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0"
   },
@@ -37,6 +38,7 @@
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.6"
+    "lint-staged": "^16.2.6",
+    "prettier": "3.6.2"
   }
 }

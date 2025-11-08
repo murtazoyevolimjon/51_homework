@@ -1,70 +1,99 @@
-import express from "express";
-import path from "node:path";
-import { Blog } from "./model/blog.model.js";
-import { connectDB } from "./src/config/db.js";
+import express from 'express';
+import path from 'path';
+import mongoose from 'mongoose';
+import { fileURLToPath } from 'url';
+import { Blog } from './models/blog.model.js';  // blog.model.js faylidan Blog modelini import qilamiz
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// set the view engine to ejs
+// Middlewarlar
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
-app.set("views", path.join(import.meta.dirname, "views"));
 
-// use res.render to load up an ejs view file
+// Views konfiguratsiyasi
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-app.get("/", function (req, res) {
-  res.render("pages/index");
+// Statik fayllar uchun
+app.use(express.static(path.join(__dirname, 'public')));
+
+// MongoDB ulanish funksiyasi
+const connectDB = async () => {
+  try {
+    await mongoose.connect('mongodb://127.0.0.1:27017/superapp');
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('DB connection error:', err);
+  }
+};
+
+// ROUTES
+
+// Bosh sahifa
+app.get('/', (req, res) => {
+  res.render('pages/index');
 });
 
-app.get("/blog", async function (req, res) {
-  const blogs = await Blog.find({});
-  res.render("pages/blog", { blogs });
+// Barcha bloglarni ko‘rsatish
+app.get('/blog', async (req, res) => {
+  const blogs = await Blog.find({}).sort({ createdAt: -1 });
+  res.render('pages/blog', { blogs });
 });
 
-app.get("/blog/new", async function (req, res) {
-  res.render("pages/new");
+// Yangi blog qo‘shish formasi
+app.get('/blog/new', (req, res) => {
+  res.render('pages/new_blog');  // new_blog.ejs faylini render qiladi
 });
 
-app.get("/blog/edit/:id", async function (req, res) {
+
+// Yangi blog yaratish
+app.post('/blog', async (req, res) => {
+  const body = req.body;
+  await Blog.create(body);
+  res.redirect('/blog');
+});
+
+// Blog tahrirlash formasi
+app.get('/blog/edit/:id', async (req, res) => {
   const { id } = req.params;
   const blog = await Blog.findById(id);
-  res.render("pages/blog_edit", { blog });
+  res.render('pages/edit.blog', { blog }); // views/pages/edit.blog.ejs
 });
 
-app.get("/blog/:id", async function (req, res) {
+// Blogni yangilash
+app.post('/blog/:id', async (req, res) => {
+  const { id } = req.params;
+  const body = req.body;
+  await Blog.findByIdAndUpdate(id, body, { new: true });
+  res.redirect('/blog');
+});
+
+// Bitta blogni ko‘rsatish
+app.get('/blog/:id', async (req, res) => {
   const { id } = req.params;
   const blog = await Blog.findById(id);
-  res.render("pages/blog_one", { blog });
+  res.render('pages/one_blog', { blog }); // views/pages/one_blog.ejs
 });
 
-app.post("/blog", async function (req, res) {
-  const body = req.body;
-  const newPost = await Blog.create(body);
-  console.log(newPost);
-  res.redirect("/blog");
+// About sahifa
+app.get('/about', (req, res) => {
+  res.render('pages/about');
 });
 
-app.post("/blog/:id", async function (req, res) {
-  const body = req.body;
-  const { id } = req.params;
-
-  const updatedPost = await Blog.findByIdAndUpdate(id, body, { new: true });
-  console.log(updatedPost);
-  res.redirect("/blog");
-});
-
+// Serverni ishga tushirish
 const bootstrap = async () => {
   try {
     await connectDB();
-
     app.listen(8080, () => {
-      console.log("Server is listening on port 8080");
+      console.log('✅ Server is listening on port 8080');
     });
   } catch (e) {
     console.error(e);
-    throw new Error(e);
   }
 };
 
 bootstrap();
+
